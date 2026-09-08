@@ -1,3 +1,5 @@
+const config = require('../config');
+
 const asyncHandler = (fn) => {
   return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
@@ -40,11 +42,11 @@ const parseIntOrDefault = (value, defaultValue) => {
   return isNaN(parsed) ? defaultValue : parsed;
 };
 
-const isProduction = () => process.env.NODE_ENV === 'production';
+const isProduction = () => config.env === 'production';
 
-const isDevelopment = () => process.env.NODE_ENV === 'development';
+const isDevelopment = () => config.env === 'development';
 
-const isTest = () => process.env.NODE_ENV === 'test';
+const isTest = () => config.env === 'test';
 
 module.exports = {
   asyncHandler,

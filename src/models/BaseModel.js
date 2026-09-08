@@ -8,23 +8,23 @@ class BaseModel {
     this.updatedAt = data.updatedAt || null;
   }
 
-  static async findAll(filters = {}) {
+  static async findAll(_filters = {}) {
     throw new Error('Method not implemented');
   }
 
-  static async findById(id) {
+  static async findById(_id) {
     throw new Error('Method not implemented');
   }
 
-  static async create(data) {
+  static async create(_data) {
     throw new Error('Method not implemented');
   }
 
-  static async update(id, data) {
+  static async update(_id, _data) {
     throw new Error('Method not implemented');
   }
 
-  static async delete(id) {
+  static async delete(_id) {
     throw new Error('Method not implemented');
   }
 

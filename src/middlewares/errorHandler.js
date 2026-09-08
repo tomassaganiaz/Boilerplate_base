@@ -2,7 +2,7 @@ const logger = require('../config/logger');
 const { AppError } = require('../utils/errors');
 const config = require('../config');
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, _next) => {
   let error = err;
 
   if (!(err instanceof AppError)) {

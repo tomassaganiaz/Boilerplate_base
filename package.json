@@ -12,8 +12,7 @@
     "test:integration": "jest tests/integration",
     "lint": "eslint src/ tests/",
     "lint:fix": "eslint src/ tests/ --fix",
-    "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\"",
-    "prepare": "husky install"
+    "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\""
   },
   "keywords": [
     "nodejs",
@@ -35,6 +34,9 @@
     "helmet": "^7.1.0",
     "compression": "^1.7.4",
     "express-rate-limit": "^7.1.5"
+  },
+  "overrides": {
+    "qs": "6.16.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",

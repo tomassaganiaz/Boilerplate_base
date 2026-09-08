@@ -23,7 +23,7 @@ describe('Example Routes', () => {
   describe('GET /api/v1/examples', () => {
     it('should call controller.getAll', async () => {
       const mockData = [{ id: 1, name: 'Test' }];
-      exampleController.getAll.mockImplementation((req, res, next) => {
+      exampleController.getAll.mockImplementation((req, res, _next) => {
         res.json({ success: true, data: mockData });
       });
       authenticate.mockImplementation((req, res, next) => next());
@@ -41,7 +41,7 @@ describe('Example Routes', () => {
   describe('GET /api/v1/examples/:id', () => {
     it('should call controller.getById with id', async () => {
       const mockEntity = { id: 1, name: 'Test' };
-      exampleController.getById.mockImplementation((req, res, next) => {
+      exampleController.getById.mockImplementation((req, res, _next) => {
         res.json({ success: true, data: mockEntity });
       });
       authenticate.mockImplementation((req, res, next) => next());
@@ -60,7 +60,7 @@ describe('Example Routes', () => {
       const newEntity = { name: 'New', description: 'New desc' };
       const createdEntity = { id: 1, ...newEntity };
       
-      exampleController.create.mockImplementation((req, res, next) => {
+      exampleController.create.mockImplementation((req, res, _next) => {
         res.status(201).json({ success: true, data: createdEntity });
       });
       authenticate.mockImplementation((req, res, next) => {
@@ -83,7 +83,7 @@ describe('Example Routes', () => {
     it('should call controller.update with id and body', async () => {
       const updatedEntity = { id: 1, name: 'Updated' };
       
-      exampleController.update.mockImplementation((req, res, next) => {
+      exampleController.update.mockImplementation((req, res, _next) => {
         res.json({ success: true, data: updatedEntity });
       });
       authenticate.mockImplementation((req, res, next) => {
@@ -104,7 +104,7 @@ describe('Example Routes', () => {
 
   describe('DELETE /api/v1/examples/:id', () => {
     it('should call controller.delete with id', async () => {
-      exampleController.delete.mockImplementation((req, res, next) => {
+      exampleController.delete.mockImplementation((req, res, _next) => {
         res.status(204).send();
       });
       authenticate.mockImplementation((req, res, next) => {

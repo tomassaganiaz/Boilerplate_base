@@ -48,7 +48,7 @@ class ExampleModel {
   }
 
   static async delete(id) {
-    return true;
+    return this.records.delete(Number(id));
   }
 
   toJSON() {
