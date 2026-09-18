@@ -133,15 +133,24 @@ Copiar `.env.example` → `.env`. En producción `JWT_SECRET` y `JWT_REFRESH_SEC
 ## Docker
 
 ```bash
-# Construir imagen
+# Construir imagen multi-stage (non-root, HEALTHCHECK)
 docker build -t boilerplate-nodejs .
 
-# Ejecutar contenedor
-docker-compose up
-
-# Ejecutar en background
+# Ejecutar con Postgres + healthcheck + límites
 docker-compose up -d
+
+# Logs y puertos
+docker-compose logs -f app
+docker ps
+
+# Rollback a versión anterior
+docker-compose down
+git checkout <tag-anterior>  # ej v1.1.0
+docker-compose up --build -d
+# o revert: git revert <commit> && git push
 ```
+
+Variables: `PORT`, `DB_*`, `JWT_*`, `CORS_ORIGIN`, `LOG_LEVEL`. Ver `docs/COMMIT_CONVENTIONS.md` para versionado SemVer.
 
 ## Testing
 

@@ -1,29 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const exampleController = require('../controllers/ExampleController');
-const { validateBody, validateParams } = require('../middlewares/validator');
+const { validateBody, validateParams, validateQuery } = require('../middlewares/validator');
 const { authenticate, optionalAuth, authorize } = require('../middlewares/auth');
-const { createExampleSchema, updateExampleSchema, idParamSchema, paginationSchema } = require('../config/schemas');
+const {
+  createExampleSchema,
+  updateExampleSchema,
+  idParamSchema,
+  paginationSchema,
+} = require('../config/schemas');
 
-router.get('/',
-  optionalAuth,
-  validateParams(paginationSchema),
-  exampleController.getAll
-);
+router.get('/', optionalAuth, validateQuery(paginationSchema), exampleController.getAll);
 
-router.get('/:id',
-  validateParams(idParamSchema),
-  exampleController.getById
-);
+router.get('/:id', validateParams(idParamSchema), exampleController.getById);
 
-router.post('/',
+router.post(
+  '/',
   authenticate,
   authorize('admin', 'user'),
   validateBody(createExampleSchema),
   exampleController.create
 );
 
-router.put('/:id',
+router.put(
+  '/:id',
   authenticate,
   authorize('admin'),
   validateParams(idParamSchema),
@@ -31,7 +31,8 @@ router.put('/:id',
   exampleController.update
 );
 
-router.delete('/:id',
+router.delete(
+  '/:id',
   authenticate,
   authorize('admin'),
   validateParams(idParamSchema),

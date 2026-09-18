@@ -3,17 +3,20 @@ require('dotenv').config();
 const Joi = require('joi');
 
 const envSchema = Joi.object({
-  NODE_ENV: Joi.string()
-    .valid('development', 'test', 'production')
-    .default('development'),
+  NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
   PORT: Joi.number().port().default(3000),
-  JWT_SECRET: Joi.string()
-    .when('NODE_ENV', {
-      is: 'production',
-      then: Joi.string().min(32).required(),
-      otherwise: Joi.string().min(1).required(),
-    }),
-  JWT_EXPIRES_IN: Joi.string().default('7d'),
+  JWT_SECRET: Joi.string().when('NODE_ENV', {
+    is: 'production',
+    then: Joi.string().min(32).required(),
+    otherwise: Joi.string().min(1).required(),
+  }),
+  JWT_EXPIRES_IN: Joi.string().default('15m'),
+  JWT_REFRESH_SECRET: Joi.string().when('NODE_ENV', {
+    is: 'production',
+    then: Joi.string().min(32).required(),
+    otherwise: Joi.string().min(1).default('refresh-secret-dev'),
+  }),
+  JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
   DB_HOST: Joi.string().default('localhost'),
   DB_PORT: Joi.number().port().default(5432),
   DB_NAME: Joi.string().default('boilerplate'),
@@ -29,6 +32,7 @@ const envSchema = Joi.object({
   RATE_LIMIT_WINDOW_MS: Joi.number().integer().positive().default(900000),
   RATE_LIMIT_MAX_REQUESTS: Joi.number().integer().positive().default(100),
   BODY_LIMIT: Joi.string().default('1mb'),
+  CORS_ORIGIN: Joi.string().default('*'),
 }).unknown(true);
 
 const { error, value: env } = envSchema.validate(process.env, {
@@ -53,6 +57,8 @@ const config = {
   jwt: {
     secret: env.JWT_SECRET,
     expiresIn: env.JWT_EXPIRES_IN,
+    refreshSecret: env.JWT_REFRESH_SECRET,
+    refreshExpiresIn: env.JWT_REFRESH_EXPIRES_IN,
   },
   log: {
     level: env.LOG_LEVEL,
@@ -63,6 +69,7 @@ const config = {
   },
   http: {
     bodyLimit: env.BODY_LIMIT,
+    corsOrigin: env.CORS_ORIGIN,
   },
   pagination: {
     defaultLimit: 20,

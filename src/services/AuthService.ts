@@ -8,8 +8,24 @@ import type { JwtPayload } from '../types';
 const refreshStore = new Map<string, { userId: string; role: string }>();
 // Usuarios demo (password: "password123" bcrypt)
 const users = new Map<string, { id: string; email: string; passwordHash: string; role: string }>([
-  ['admin@example.com', { id: '1', email: 'admin@example.com', passwordHash: bcrypt.hashSync('password123', 10), role: 'admin' }],
-  ['user@example.com', { id: '2', email: 'user@example.com', passwordHash: bcrypt.hashSync('password123', 10), role: 'user' }],
+  [
+    'admin@example.com',
+    {
+      id: '1',
+      email: 'admin@example.com',
+      passwordHash: bcrypt.hashSync('password123', 10),
+      role: 'admin',
+    },
+  ],
+  [
+    'user@example.com',
+    {
+      id: '2',
+      email: 'user@example.com',
+      passwordHash: bcrypt.hashSync('password123', 10),
+      role: 'user',
+    },
+  ],
 ]);
 
 export interface LoginResult {
@@ -27,8 +43,14 @@ export class AuthService {
     if (!ok) throw new UnauthorizedError('Invalid credentials');
 
     const payload: JwtPayload = { id: user.id, role: user.role };
-    const accessToken = jwt.sign(payload, config.jwt.secret, { expiresIn: config.jwt.expiresIn } as unknown as jwt.SignOptions);
-    const refreshToken = jwt.sign(payload, config.jwt.refreshSecret, { expiresIn: config.jwt.refreshExpiresIn } as unknown as jwt.SignOptions);
+    const refreshSecret =
+      config.jwt.refreshSecret || process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret';
+    const accessToken = jwt.sign(payload, config.jwt.secret, {
+      expiresIn: config.jwt.expiresIn,
+    } as unknown as jwt.SignOptions);
+    const refreshToken = jwt.sign(payload, refreshSecret, {
+      expiresIn: config.jwt.refreshExpiresIn,
+    } as unknown as jwt.SignOptions);
 
     refreshStore.set(refreshToken, { userId: user.id, role: user.role });
 
@@ -40,12 +62,18 @@ export class AuthService {
     const stored = refreshStore.get(refreshToken);
     if (!stored) throw new UnauthorizedError('Invalid refresh token');
     try {
-      const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret) as JwtPayload;
-      const accessToken = jwt.sign({ id: decoded.id, role: decoded.role }, config.jwt.secret, { expiresIn: config.jwt.expiresIn } as unknown as jwt.SignOptions);
+      const decoded = jwt.verify(
+        refreshToken,
+        config.jwt.refreshSecret || process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret'
+      ) as JwtPayload;
+      const accessToken = jwt.sign({ id: decoded.id, role: decoded.role }, config.jwt.secret, {
+        expiresIn: config.jwt.expiresIn,
+      } as unknown as jwt.SignOptions);
       return { accessToken };
     } catch (err) {
       refreshStore.delete(refreshToken);
-      if ((err as { name?: string }).name === 'TokenExpiredError') throw new UnauthorizedError('Refresh token expired');
+      if ((err as { name?: string }).name === 'TokenExpiredError')
+        throw new UnauthorizedError('Refresh token expired');
       throw new UnauthorizedError('Invalid refresh token');
     }
   }

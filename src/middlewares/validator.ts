@@ -8,10 +8,14 @@ type Property = 'body' | 'query' | 'params';
 export const validate =
   (schema: Schema, property: Property = 'body') =>
   (req: Request, _res: Response, next: NextFunction): void => {
-    const { error, value } = schema.validate((req as unknown as Record<string, unknown>)[property], {
-      abortEarly: false,
-      stripUnknown: true,
-    });
+    const { error, value } = schema.validate(
+      (req as unknown as Record<string, unknown>)[property],
+      {
+        abortEarly: false,
+        stripUnknown: false,
+        allowUnknown: false,
+      }
+    );
 
     if (error) {
       const details = error.details.map((detail) => ({
