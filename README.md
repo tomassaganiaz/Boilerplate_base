@@ -6,22 +6,21 @@ Boilerplate profesional para proyectos Node.js con arquitectura MVC.
 
 ```
 ├── src/
-│   ├── app.js           # Configuración de la aplicación Express
-│   ├── index.js         # Punto de entrada y arranque del servidor
-│   ├── models/         # Capa de datos
-│   ├── views/          # Capa de presentación (rutas)
-│   ├── controllers/   # Capa de control
-│   ├── services/       # Lógica de negocio
-│   ├── middlewares/    # Middlewares Express
-│   ├── config/         # Configuración
-│   ├── utils/          # Utilidades
-│   ├── routes/         # Rutas
-│   └── agents/         # Documentación para IA
+│   ├── app.ts           # App Express (sin side-effects)
+│   ├── server.ts        # startServer() + gracefulShutdown
+│   ├── index.ts         # Entrada que arranca el servidor
+│   ├── config/          # Configuración + Joi + database.ts
+│   ├── db/migrations/   # SQL migraciones
+│   ├── middlewares/     # requestId, metrics, auth, validator...
+│   ├── models/          # Capa de datos (TS)
+│   ├── controllers/     # Capa de control (TS)
+│   ├── services/        # Lógica de negocio + AuthService
+│   ├── routes/          # Rutas + authRoutes
+│   ├── types/           # Interfaces SOLID
+│   └── utils/           # Helpers tipados
 ├── tests/
-│   ├── unit/           # Tests unitarios
-│   └── integration/   # Tests de integración
-├── scripts/            # Scripts de automatización
-└── docs/               # Documentación
+├── docs/openapi.yaml    # Spec OpenAPI 3.0
+└── .github/workflows/ci.yml
 ```
 
 ## Requisitos
@@ -46,14 +45,18 @@ chmod +x scripts/install.sh
 
 | Comando | Descripción |
 |---------|-------------|
-| `npm start` | Iniciar el servidor |
-| `npm run dev` | Iniciar en modo desarrollo (con hot-reload) |
-| `npm test` | Ejecutar todos los tests |
-| `npm run test:unit` | Ejecutar tests unitarios |
-| `npm run test:integration` | Ejecutar tests de integración |
-| `npm run lint` | Verificar código con ESLint |
-| `npm run lint:fix` | Corregir errores de ESLint automáticamente |
-| `npm run format` | Formatear código con Prettier |
+| `npm run build` | Compilar TS a `dist/` |
+| `npm start` | Iniciar servidor compilado |
+| `npm run dev` | `ts-node-dev` con hot-reload |
+| `npm test` | Tests con cobertura (umbral 80%) |
+| `npm run test:unit` | Solo unit tests |
+| `npm run test:integration` | Solo integración |
+| `npm run lint` / `lint:fix` | ESLint |
+| `npm run format` | Prettier |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run db:migrate` | Ejecuta migraciones SQL |
+| `npm run db:seed` | Seeds idempotentes |
+| `npm run audit` | `npm audit` moderado |
 
 ## Capas MVC
 
@@ -82,29 +85,50 @@ Cada capa tiene su propio archivo `AGENT.md` con:
 
 ## API Endpoints
 
-### Health Check
+### Observabilidad
 ```
-GET /api/v1/health
+GET /api/v1/health   - estado + DB
+GET /api/v1/live     - liveness
+GET /api/v1/ready    - readiness (503 si DB down)
+GET /api/v1/metrics  - totalRequests, avgLatency, uptime
 ```
 
-### Examples
+### Auth (refresh token flow)
 ```
-GET    /api/v1/examples      - Listar todos
-GET    /api/v1/examples/:id  - Obtener por ID
-POST   /api/v1/examples      - Crear nuevo
-PUT    /api/v1/examples/:id  - Actualizar
-DELETE /api/v1/examples/:id  - Eliminar
+POST /api/v1/auth/login   {email,password} -> {accessToken (15m), refreshToken (7d)}
+POST /api/v1/auth/refresh {refreshToken} -> {accessToken}
+POST /api/v1/auth/logout  {refreshToken}
 ```
+
+### Examples (paginación, validación Joi, 204 en delete)
+```
+GET    /api/v1/examples?page=1&limit=20&status=active
+GET    /api/v1/examples/:id
+POST   /api/v1/examples      (Bearer admin/user)
+PUT    /api/v1/examples/:id  (Bearer admin)
+DELETE /api/v1/examples/:id  (Bearer admin)
+```
+Docs OpenAPI: `docs/openapi.yaml`
 
 ## Variables de Entorno
 
-Copiar `.env.example` como `.env` y completar los valores necesarios. `JWT_SECRET` es obligatorio; en producción debe tener al menos 32 caracteres. La aplicación también valida los valores de entorno al iniciar.
+Copiar `.env.example` → `.env`. En producción `JWT_SECRET` y `JWT_REFRESH_SECRET` ≥32 chars y `DB_PASSWORD` requerido (validación Joi falla si falta).
 
-## Seguridad de Configuración
+| Var | Descripción |
+|-----|-------------|
+| `CORS_ORIGIN` | `*` o lista `https://a.com,https://b.com` |
+| `JWT_EXPIRES_IN` | `15m` (access corta) |
+| `JWT_REFRESH_EXPIRES_IN` | `7d` |
 
-- No se usan secretos JWT ni contraseñas de base de datos conocidos por defecto en producción.
-- La aplicación Express se exporta desde `src/app.js` sin abrir un puerto, lo que facilita los tests.
-- `src/index.js` se encarga únicamente de iniciar el servidor y gestionar el apagado ordenado.
+## Seguridad
+
+- `helmet`, `cors` por whitelist, `compression`, `express-rate-limit` (global + `authLimiter` 5 req/15m para login).
+- `requestId` (`X-Request-Id`) en logs (`method ruta status - duration [id]`).
+- Secrets sin defaults inseguros en prod, payload limitado por `BODY_LIMIT`.
+
+## Persistencia
+
+`src/config/database.ts` usa `pg` si está disponible, sino memoria (tests). Migraciones en `src/db/migrations/*.sql`, seeds idempotentes. `docker-compose` levanta Postgres con healthcheck y límites de recursos.
 
 ## Docker
 

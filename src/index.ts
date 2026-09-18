@@ -1,23 +1,17 @@
 import config from './config';
-import logger from './config/logger';
 import app from './app';
+import { startServer, gracefulShutdown } from './server';
 
-const PORT = config.port;
+// Punto de entrada — delega a startServer para permitir tests sin side-effects
+const server = startServer(config.port);
 
-const server = app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT} in ${config.env} mode`);
+process.on('SIGTERM', async () => {
+  await gracefulShutdown(server, 'SIGTERM');
+  process.exit(0);
 });
-
-// Apagado ordenado — libera conexiones antes de salir
-const gracefulShutdown = (signal: string): void => {
-  logger.info(`${signal} received, shutting down gracefully`);
-  server.close(() => {
-    logger.info('Process terminated');
-    process.exit(0);
-  });
-};
-
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGINT', async () => {
+  await gracefulShutdown(server, 'SIGINT');
+  process.exit(0);
+});
 
 export default app;

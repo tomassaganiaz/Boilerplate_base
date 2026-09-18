@@ -15,7 +15,11 @@
     "lint": "eslint src/ tests/",
     "lint:fix": "eslint src/ tests/ --fix",
     "format": "prettier --write \"src/**/*.{js,ts}\" \"tests/**/*.{js,ts}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky install",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "ts-node src/db/seeds/001_examples.ts",
+    "audit": "npm audit --audit-level=moderate"
   },
   "keywords": [
     "nodejs",
@@ -36,7 +40,9 @@
     "cors": "^2.8.5",
     "helmet": "^7.1.0",
     "compression": "^1.7.4",
-    "express-rate-limit": "^7.1.5"
+    "express-rate-limit": "^7.1.5",
+    "pg": "^8.11.3",
+    "uuid": "^9.0.1"
   },
   "overrides": {
     "qs": "6.16.0"
@@ -65,5 +71,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "lint-staged": {
+    "*.{js,ts}": ["eslint --fix", "prettier --write"]
   }
 }

@@ -20,5 +20,21 @@ module.exports = {
     'object-shorthand': 'error',
     'quote-props': ['error', 'as-needed'],
   },
+  overrides: [
+    {
+      files: ['*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+        '@typescript-eslint/no-require-imports': 'off',
+      },
+    },
+    {
+      files: ['*.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'warn',
+        '@typescript-eslint/ban-ts-comment': 'off',
+      },
+    },
+  ],
   ignorePatterns: ['node_modules/', 'coverage/', 'dist/', 'build/'],
 };

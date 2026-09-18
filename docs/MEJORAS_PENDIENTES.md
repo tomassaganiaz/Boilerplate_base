@@ -2,12 +2,22 @@
 
 Este documento reúne mejoras sugeridas para evolucionar el boilerplate Node.js MVC. Las tareas están ordenadas por prioridad y pueden convertirse en issues independientes.
 
-## Estado actual
+## Estado actual (2026-09-18)
 
-- [x] Validación centralizada de variables de entorno.
-- [x] Eliminación de secretos JWT y contraseñas por defecto en producción.
-- [x] Separación de la aplicación Express y el proceso servidor.
-- [x] Límite configurable para el tamaño del body.
+- [x] Validación centralizada de variables de entorno (Joi, `src/config/index.ts:8`).
+- [x] Eliminación de secretos por defecto en producción (`JWT_SECRET`/`JWT_REFRESH_SECRET` ≥32, `DB_PASSWORD` requerido).
+- [x] Separación app vs servidor (`src/app.ts` exporta app, `src/server.ts:startServer()` + `gracefulShutdown`).
+- [x] Límite configurable de body (`BODY_LIMIT`, `config.http.bodyLimit`).
+- [x] Migración completa JS → TS con SOLID (interfaces `IRepository/IService` en `src/types/index.ts:6`, DI por constructor).
+- [x] Persistencia DB documentada (`src/config/database.ts`, `src/db/migrations/001_create_examples.sql`, `docker-compose` con Postgres + healthcheck).
+- [x] Auth con refresh token (`src/services/AuthService.ts`, `src/routes/authRoutes.ts`, access 15m / refresh 7d, revocación en memoria).
+- [x] Validación Joi por endpoint + respuestas uniformes (`src/middlewares/validator.ts:7`, `src/utils/response-helpers.ts:1`).
+- [x] Observabilidad: `requestId` (`src/middlewares/requestId.ts:1`), logs con `X-Request-Id`, métricas (`src/middlewares/metrics.ts:1`), endpoints `/health`/`/live`/`/ready`/`/metrics`.
+- [x] Seguridad HTTP: CORS whitelist (`CORS_ORIGIN`), `helmet`, `authLimiter` en login, `npm audit`.
+- [x] Testing + CI: `jest.config.js:6` coverage 80%, ` .github/workflows/ci.yml`, tests de auth y observabilidad.
+- [x] DX: `husky` + `lint-staged` en `package.json:50`, plantillas PR/Issue.
+- [x] Docker multi-stage, usuario no root, `HEALTHCHECK` (`Dockerfile:1`), límites recursos en `docker-compose.yml`.
+- [x] API versionada `/api/v1`, OpenAPI `docs/openapi.yaml`, paginación/filtros/ordenamiento.
 
 ## Prioridad alta
 

@@ -67,9 +67,9 @@ export interface AppConfig {
   env: 'development' | 'test' | 'production';
   port: number;
   db: { host: string; port: number; name: string; user: string; password: string };
-  jwt: { secret: string; expiresIn: string };
+  jwt: { secret: string; expiresIn: string; refreshSecret: string; refreshExpiresIn: string };
   log: { level: string };
   rateLimit: { windowMs: number; max: number };
-  http: { bodyLimit: string };
+  http: { bodyLimit: string; corsOrigin: string };
   pagination: { defaultLimit: number; maxLimit: number };
 }
