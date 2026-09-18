@@ -1,7 +1,14 @@
+jest.mock('../../../src/models/ExampleModel', () => ({
+  findAll: jest.fn(),
+  findById: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  ['delete']: jest.fn(),
+  tableName: 'examples',
+}));
+
 const ExampleService = require('../../../src/services/ExampleService');
 const ExampleModel = require('../../../src/models/ExampleModel');
-
-jest.mock('../../../src/models/ExampleModel');
 
 describe('ExampleService', () => {
   beforeEach(() => {

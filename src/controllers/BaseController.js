@@ -7,6 +7,12 @@ class BaseController {
       throw new Error('Service is required');
     }
     this.service = service;
+    // Bind para que jest automock y express no pierdan el contexto (SOLID: SRP + DI)
+    this.getAll = this.getAll.bind(this);
+    this.getById = this.getById.bind(this);
+    this.create = this.create.bind(this);
+    this.update = this.update.bind(this);
+    this.delete = this.delete.bind(this);
   }
 
   async getAll(req, res, next) {

@@ -1,15 +1,21 @@
-const request = require('supertest');
-const express = require('express');
-const exampleRoutes = require('../../../src/routes/exampleRoutes');
-const exampleController = require('../../../src/controllers/ExampleController');
-const { authenticate, authorize } = require('../../../src/middlewares/auth');
-
-jest.mock('../../../src/controllers/ExampleController');
+jest.mock('../../../src/controllers/ExampleController', () => ({
+  getAll: jest.fn(),
+  getById: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  ['delete']: jest.fn(),
+}));
 jest.mock('../../../src/middlewares/auth', () => ({
   authenticate: jest.fn((req, res, next) => next()),
   optionalAuth: jest.fn((req, res, next) => next()),
   authorize: jest.fn(() => (req, res, next) => next()),
 }));
+
+const request = require('supertest');
+const express = require('express');
+const exampleRoutes = require('../../../src/routes/exampleRoutes');
+const exampleController = require('../../../src/controllers/ExampleController');
+const { authenticate, authorize } = require('../../../src/middlewares/auth');
 
 const app = express();
 app.use(express.json());
