@@ -1,0 +1,92 @@
+openapi: 3.0.3
+info:
+  title: Boilerplate Node.js MVC API
+  version: 1.0.0
+  description: API con autenticación JWT, paginación, y health checks.
+servers:
+  - url: http://localhost:3000/api/v1
+paths:
+  /health:
+    get:
+      summary: Health general
+      responses:
+        '200': { description: ok }
+  /live:
+    get:
+      summary: Liveness
+      responses: { '200': { description: alive } }
+  /ready:
+    get:
+      summary: Readiness (DB check)
+      responses: { '200': { description: ready }, '503': { description: not_ready } }
+  /metrics:
+    get:
+      summary: Métricas básicas
+      responses: { '200': { description: metrics } }
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 6 }
+      responses:
+        '200': { description: tokens }
+        '401': { description: invalid credentials }
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties: { refreshToken: { type: string } }
+      responses: { '200': { description: new access token }, '401': { description: invalid } }
+  /examples:
+    get:
+      summary: Listar ejemplos (paginado)
+      parameters:
+        - in: query; name: page; schema: { type: integer, default: 1 }
+        - in: query; name: limit; schema: { type: integer, default: 20 }
+        - in: query; name: status; schema: { type: string, enum: [active, inactive] }
+      responses: { '200': { description: list } }
+    post:
+      summary: Crear ejemplo
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, maxLength: 100 }
+                description: { type: string, maxLength: 500 }
+                status: { type: string, enum: [active, inactive] }
+      responses: { '201': { description: created }, '401': { description: unauthorized } }
+  /examples/{id}:
+    get:
+      summary: Obtener por ID
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { '200': { description: entity }, '404': { description: not found } }
+    put:
+      summary: Actualizar
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: updated } }
+    delete:
+      summary: Eliminar
+      security: [{ bearerAuth: [] }]
+      responses: { '204': { description: no content } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }

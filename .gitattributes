@@ -1,0 +1,11 @@
+# GitHub Linguist - controlar % de lenguajes
+# Objetivo: 98% TypeScript, max 2% JavaScript solo configs
+
+dist/** linguist-generated=true linguist-vendored=true
+coverage/** linguist-generated=true linguist-vendored=true
+
+# Solo queda 1 JS config legitimo (<2%)
+.eslintrc.js linguist-language=JavaScript linguist-vendored=false
+
+# Opcional: marcar husky y scripts como vendored si quieres mas pureza TS
+.husky/** linguist-vendored=true
